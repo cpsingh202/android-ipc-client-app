@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Client App</string>
+
+    <string name="hint_input">Enter text here</string>
+    <string name="error_invalid_input">Invalid input!</string>
+    <string name="btn_submit">SUBMIT</string>
+    <string name="btn_dialog_dismiss">DISMISS</string>
+
+</resources>

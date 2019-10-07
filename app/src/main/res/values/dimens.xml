@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="activity_padding">20dp</dimen>
+
+    <dimen name="space_regular">10dp</dimen>
+    <dimen name="space_medium">16dp</dimen>
+    <dimen name="space_large">20dp</dimen>
+
+    <dimen name="radius_regular">4dp</dimen>
+
+</resources>
