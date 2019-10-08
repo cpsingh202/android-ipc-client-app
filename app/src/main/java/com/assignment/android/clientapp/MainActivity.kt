@@ -9,6 +9,7 @@ import android.os.*
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -67,43 +68,56 @@ class MainActivity : AppCompatActivity(), AppEventListener {
 
 
     override fun onSubmit() {
-        val input = binding.etInput.text
-        Log.i(TAG, "Input: $input")
+        val input = binding.etInput.text.trim().toString()
 
-        if (input.isNullOrEmpty()) {
-            binding.etInput.error = getString(R.string.error_invalid_input)
+        if (input.isEmpty()) {
+            showError(getString(R.string.error_invalid_input))
         } else {
             hideKeyboard()
+            Toast.makeText(this, R.string.msg_wait, Toast.LENGTH_SHORT).show()
 
             if (this.isServiceBounded) {
 
-                //Setup the message for invocation
-                val message = Message.obtain(null, 1, 0, 0)
+                //Prepare the data object
+                val data = Bundle()
+                data.putString(getString(R.string.key_input), input)
+
                 try {
+                    val message = Message()
+
+                    //Set the data
+                    message.data = data
+
                     //Set the ReplyTo Messenger for processing the invocation response
                     message.replyTo = this.replyTo
 
                     //Make the invocation
                     this.messenger?.send(message)
+
                 } catch (exc: RemoteException) {
                     exc.printStackTrace()
-                    Log.i(TAG, "Invocation Failed!!")
+                    showError(getString(R.string.error_invocation_failed))
                 }
             } else {
-                Log.i(TAG, "Service is Not Bound!!")
+                showError(getString(R.string.error_service_not_bound))
             }
         }
     }
 
     override fun showResult(result: String) {
         val alertDialog = AlertDialog.Builder(this).create()
-        alertDialog.setMessage(result)
+        alertDialog.setMessage("Reply:  $result")
         alertDialog.setButton(
-            AlertDialog.BUTTON_NEUTRAL,
+            AlertDialog.BUTTON_POSITIVE,
             getString(R.string.btn_dialog_dismiss)
         ) { dialog, which -> dialog.dismiss() }
         alertDialog.show()
     }
+
+    override fun showError(error: String) {
+        binding.etInput.error = error
+    }
+
 
     private fun hideKeyboard() {
         val imm = this.getSystemService(Activity.INPUT_METHOD_SERVICE)
@@ -132,9 +146,9 @@ class MainActivity : AppCompatActivity(), AppEventListener {
 
     private inner class RemoteResponseHandler : Handler() {
 
-        override fun handleMessage(msg: Message) {
-            val what = msg.what
-            showResult("Remote Service replied - ($what)")
+        override fun handleMessage(message: Message) {
+            val result = message.data
+            showResult(result.getString(getString(R.string.key_result)).orEmpty())
         }
     }
 }
@@ -142,4 +156,5 @@ class MainActivity : AppCompatActivity(), AppEventListener {
 interface AppEventListener {
     fun onSubmit()
     fun showResult(result: String)
+    fun showError(error: String)
 }

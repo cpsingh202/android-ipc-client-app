@@ -24,7 +24,7 @@
             android:background="@drawable/bg_rounded_border"
             android:focusable="true"
             android:hint="@string/hint_input"
-            android:inputType="text"
+            android:inputType="textCapWords"
             android:minHeight="90dp"
             android:padding="@dimen/space_medium"
             app:layout_constraintTop_toTopOf="parent" />

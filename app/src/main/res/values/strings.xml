@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">Client App</string>
 
-    <string name="hint_input">Enter text here</string>
-    <string name="error_invalid_input">Invalid input!</string>
+    <string name="hint_input">Enter Message</string>
+    <string name="error_invalid_input">Invalid Input!</string>
+    <string name="msg_wait">Wait for response!</string>
+    <string name="error_invocation_failed">Remote Invocation Failed!</string>
+    <string name="error_service_not_bound">Remote Service is Not Bound!</string>
     <string name="btn_submit">SUBMIT</string>
     <string name="btn_dialog_dismiss">DISMISS</string>
+
+    <string name="key_input">input</string>
+    <string name="key_result">result</string>
 
 </resources>
