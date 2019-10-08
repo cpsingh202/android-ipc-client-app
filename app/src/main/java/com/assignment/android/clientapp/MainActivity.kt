@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.*
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -71,36 +70,15 @@ class MainActivity : AppCompatActivity(), AppEventListener {
         val input = binding.etInput.text.trim().toString()
 
         if (input.isEmpty()) {
-            showError(getString(R.string.error_invalid_input))
+            binding.etInput.error = getString(R.string.error_invalid_input)
         } else {
-            hideKeyboard()
             Toast.makeText(this, R.string.msg_wait, Toast.LENGTH_SHORT).show()
 
-            if (this.isServiceBounded) {
+            val data = Bundle()
+            data.putString(getString(R.string.key_input), input)
 
-                //Prepare the data object
-                val data = Bundle()
-                data.putString(getString(R.string.key_input), input)
-
-                try {
-                    val message = Message()
-
-                    //Set the data
-                    message.data = data
-
-                    //Set the ReplyTo Messenger for processing the invocation response
-                    message.replyTo = this.replyTo
-
-                    //Make the invocation
-                    this.messenger?.send(message)
-
-                } catch (exc: RemoteException) {
-                    exc.printStackTrace()
-                    showError(getString(R.string.error_invocation_failed))
-                }
-            } else {
-                showError(getString(R.string.error_service_not_bound))
-            }
+            //Send data to remote
+            sendData(data)
         }
     }
 
@@ -114,8 +92,41 @@ class MainActivity : AppCompatActivity(), AppEventListener {
         alertDialog.show()
     }
 
-    override fun showError(error: String) {
-        binding.etInput.error = error
+
+    override fun onAdd() {
+        val data = getValues(getString(R.string.operation_add))
+
+        data?.let {
+            //Send data to remote
+            sendData(it)
+        }
+    }
+
+    override fun onSubtracts() {
+        val data = getValues(getString(R.string.operation_subtracts))
+
+        data?.let {
+            //Send data to remote
+            sendData(it)
+        }
+    }
+
+    override fun onMultiply() {
+        val data = getValues(getString(R.string.operation_multiply))
+
+        data?.let {
+            //Send data to remote
+            sendData(it)
+        }
+    }
+
+    override fun onPow() {
+        val data = getValues(getString(R.string.operation_pow))
+
+        data?.let {
+            //Send data to remote
+            sendData(it)
+        }
     }
 
 
@@ -129,6 +140,57 @@ class MainActivity : AppCompatActivity(), AppEventListener {
         }
 
         imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private fun getValues(operation: String): Bundle? {
+
+        val value1 = binding.etValue1.text.trim().toString()
+        val value2 = binding.etValue2.text.trim().toString()
+
+        if (value1.isEmpty() || value2.isEmpty()) {
+
+            if (value1.isEmpty()) {
+                binding.etValue1.error = getString(R.string.error_invalid_input)
+            }
+            if (value2.isEmpty()) {
+                binding.etValue2.error = getString(R.string.error_invalid_input)
+            }
+
+            return null
+        } else {
+            val data = Bundle()
+
+            data.putString(getString(R.string.key_operation), operation)
+            data.putDouble(getString(R.string.key_value_1), value1.toDouble())
+            data.putDouble(getString(R.string.key_value_2), value2.toDouble())
+
+            return data
+        }
+    }
+
+    private fun sendData(data: Bundle) {
+        hideKeyboard()
+
+        if (this.isServiceBounded) {
+            try {
+                val message = Message()
+
+                //Set the data
+                message.data = data
+
+                //Set the ReplyTo Messenger for processing the invocation response
+                message.replyTo = this.replyTo
+
+                //Make the invocation
+                this.messenger?.send(message)
+
+            } catch (exc: RemoteException) {
+                exc.printStackTrace()
+                Toast.makeText(this, R.string.error_invocation_failed, Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, R.string.error_service_not_bound, Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -156,5 +218,9 @@ class MainActivity : AppCompatActivity(), AppEventListener {
 interface AppEventListener {
     fun onSubmit()
     fun showResult(result: String)
-    fun showError(error: String)
+
+    fun onAdd()
+    fun onSubtracts()
+    fun onMultiply()
+    fun onPow()
 }
